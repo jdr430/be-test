@@ -1,0 +1,117 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #0a0a10; color: #eaeaf0; font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; font-size: 14px; }
+a { color: #8ab4ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; }
+
+.topnav {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 18px;
+  padding: 12px 24px; background: linear-gradient(180deg, #14141d, #0e0e16);
+  border-bottom: 1px solid #25252f;
+}
+.brand { font-weight: 800; font-size: 18px; color: #fff; letter-spacing: 0.5px; }
+.brand .accent { color: #36d399; }
+.topnav .links { display: flex; gap: 14px; margin-right: auto; }
+.topnav a.link { color: #c4c4d4; padding: 6px 10px; border-radius: 6px; font-weight: 500; }
+.topnav a.link.active, .topnav a.link:hover { background: #25252f; color: #fff; text-decoration: none; }
+.balance-pill {
+  display: flex; flex-direction: column; align-items: flex-end;
+  padding: 6px 14px; border-radius: 8px; background: #1a1a25; border: 1px solid #2a2a38;
+  font-size: 12px; color: #8a8aa0;
+}
+.balance-pill strong { color: #36d399; font-size: 15px; }
+.btn-logout {
+  background: transparent; color: #c4c4d4; border: 1px solid #2a2a38; padding: 6px 12px; border-radius: 6px;
+}
+.btn-logout:hover { background: #25252f; }
+
+main { padding: 28px; max-width: 1180px; margin: 0 auto; }
+h1 { font-size: 24px; margin: 0 0 16px; }
+h2 { font-size: 18px; margin: 18px 0 10px; color: #b8b8c8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+input, select {
+  padding: 9px 12px; border-radius: 6px; border: 1px solid #2a2a38; background: #15151c; color: inherit; font-size: 14px;
+}
+input:focus { outline: 2px solid #36d399; outline-offset: -1px; }
+
+button.btn {
+  padding: 9px 16px; border-radius: 6px; border: 1px solid #2a2a38; background: #1a1a25; color: #fff; font-weight: 500;
+}
+button.btn:hover { background: #25252f; }
+button.btn-primary { background: #36d399; color: #0a0a10; border-color: #36d399; font-weight: 600; }
+button.btn-primary:hover { background: #2bb888; }
+button.btn-primary:disabled { background: #1a4a3a; color: #6a8a80; cursor: not-allowed; }
+
+.card {
+  background: #15151c; padding: 16px; border-radius: 10px; border: 1px solid #25252f; margin-bottom: 12px;
+}
+.row { display: flex; gap: 12px; align-items: center; }
+.muted { color: #8a8aa0; font-size: 13px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #25252f; font-size: 14px; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8a8aa0; font-weight: 600; }
+
+.pill {
+  padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  background: #25252f; color: #c4c4d4; display: inline-block;
+}
+.pill.active { background: #1f5132; color: #b6f5c8; }
+.pill.win { background: #1f5132; color: #b6f5c8; }
+.pill.lost { background: #5c1f1f; color: #f5b6b6; }
+.pill.pending { background: #4a3a1c; color: #f5e0a8; }
+
+.sport-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.sport-tile {
+  padding: 14px; background: #15151c; border: 1px solid #25252f; border-radius: 10px; cursor: pointer;
+  transition: all 0.15s;
+}
+.sport-tile:hover { background: #1c1c26; border-color: #36d399; transform: translateY(-1px); }
+.sport-tile .title { font-weight: 600; color: #fff; }
+.sport-tile .meta { font-size: 12px; color: #8a8aa0; margin-top: 4px; }
+
+.event-row {
+  display: grid; grid-template-columns: 120px 1fr 1fr 100px; gap: 16px; align-items: center;
+  padding: 12px 16px; background: #15151c; border: 1px solid #25252f; border-radius: 8px; margin-bottom: 8px;
+  cursor: pointer; transition: background 0.15s;
+}
+.event-row:hover { background: #1c1c26; }
+.event-row .time { color: #8a8aa0; font-size: 13px; }
+.event-row .team { font-weight: 500; }
+
+.event-detail { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+@media (max-width: 900px) { .event-detail { grid-template-columns: 1fr; } }
+
+.odds-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.odds-table th, .odds-table td { padding: 10px 12px; border-bottom: 1px solid #25252f; }
+.odds-btn {
+  padding: 8px 14px; min-width: 70px; border-radius: 6px; background: #1c1c26; color: #36d399;
+  border: 1px solid #2a3a30; font-weight: 600; cursor: pointer; font-size: 14px;
+}
+.odds-btn:hover { background: #25252f; }
+.odds-btn.selected { background: #36d399; color: #0a0a10; border-color: #36d399; }
+
+.bet-slip {
+  position: sticky; top: 80px;
+  background: #15151c; border: 1px solid #25252f; border-radius: 10px; padding: 18px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.bet-slip h3 { margin: 0; font-size: 16px; }
+.bet-slip .selection-card {
+  background: #1c1c26; padding: 12px; border-radius: 8px; border-left: 3px solid #36d399;
+}
+.bet-slip .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8a8aa0; }
+.bet-slip .stat-row { display: flex; justify-content: space-between; padding: 4px 0; }
+.bet-slip .payout { color: #36d399; font-weight: 700; font-size: 18px; }
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px; padding: 14px 18px;
+  background: #1f5132; color: #b6f5c8; border-radius: 8px; border: 1px solid #36d399;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 100;
+}
+.toast.error { background: #5c1f1f; color: #f5b6b6; border-color: #f5a0a0; }
+
+.empty-state {
+  text-align: center; padding: 60px 20px; color: #8a8aa0;
+}

@@ -1,0 +1,39 @@
+# Stub - the candidate may rewrite this freely.
+# It must end up bringing up: ui (port 3000) + Service A + Service B.
+# The example below assumes go-svc owns Service A (port 8081) and node-svc owns Service B (port 8082).
+# Swap freely if you put them the other way around.
+
+services:
+  ui:
+    build: ./ui
+    ports: ["3000:3000"]
+    environment:
+      - NEXT_PUBLIC_MOCK=false
+      - NEXT_PUBLIC_WALLET_API=http://localhost:8081
+      - NEXT_PUBLIC_PROFILE_API=http://localhost:8082
+    depends_on:
+      - go-svc
+      - node-svc
+
+  go-svc:
+    build:
+      context: .
+      dockerfile: services/go-svc/Dockerfile
+    ports: ["8081:8081"]
+    environment:
+      - PORT=8081
+      - ODDS_API_KEY=${ODDS_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./data:/app/data:ro
+
+  node-svc:
+    build:
+      context: ./services/node-svc
+    ports: ["8082:8082"]
+    environment:
+      - PORT=8082
+      - ODDS_API_KEY=${ODDS_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./data:/app/data:ro
