@@ -233,3 +233,72 @@ Push to a branch on `flotaro/be-test` (or fork it). Include:
 Cut scope if you fall behind - say so in the README. One polished service beats two half-done ones.
 
 Good luck.
+
+---
+
+# Candidate Submission Notes
+
+## 1. Service Split — Go vs Node
+
+**Service A — Wallet / Bets / Settlement → Go (`go-svc`, :8081)**
+**Service B — Auth / Profile / Notifications → Node (`node-svc`, :8082)**
+
+- **Go for the wallet:** I chose Go here because of the sensitive nature of the wallet transactions, especially around balances. I had to ensure no negative balance and guarantee concurrency for multiple bets. Goroutines with mutex locks fitted perfectly for this.
+- **Node for auth/profile:** My earlier decision meant that Node would be used for I/O processing. It handled mainly auth and some GET endpoints and I thought this appropriate for such a task. It would also have been great for the notifications handling had I got to that.
+
+## 2. Inter-Service Communication
+
+- The two services **do not call each other directly**. They are decoupled by a **shared `JWT_SECRET`** (env var): `node-svc` signs the token on login, `go-svc` verifies it on every protected request. Stateless, no chatter, no shared store.
+- The UI is the only orchestrator — it holds the token and calls each service by URL (`NEXT_PUBLIC_WALLET_API`, `NEXT_PUBLIC_PROFILE_API`).
+
+## 3. Caching Strategy (Odds API)
+
+> **NOT IMPLEMENTED — cut for time (see §5 below).** Intended design:
+> - In-memory TTL map in `go-svc`: `/sports` 5 min, `/sports/:key/events` 30 s, `/events/:id/odds` 15 s (per brief §4).
+> - Log `x-requests-remaining` / `x-requests-used` from each Odds API response.
+
+
+## 4. Settlement Worker
+
+- Implemented as a **fire-and-forget goroutine** per bet (`wallet/service.go`): sleeps 30 s, resolves a win with 45% probability, and on a win credits `stake * odds` back to the wallet and records a `WIN` ledger entry.
+- Chosen over a queue/cron for simplicity given the in-memory model.
+- State is lost on restart but acceptable for in-mem application
+
+## 5. What's Done vs. Cut (scope honesty)
+
+| Area | Status |
+|---|---|
+| Auth: `POST /auth/login` (bcrypt + JWT 24h), `GET /me` | ✅ Done |
+| JWT validation on protected endpoints, shared secret across services | ✅ Done |
+| Wallet: `GET /wallet/:userId` (balance, currency, ledger) | ✅ Done |
+| Bets: `POST /bets`, `GET /bets` (full contract shape) | ✅ Done |
+| Settlement worker (30s, 45%, `stake*odds`) | ✅ Done |
+| **Concurrency test** — N parallel bets, no overspend, `-race` clean | ✅ Done |
+| `docker compose up` — all 3 services build & run, verified across services via API | ✅ Done |
+| **Odds API proxy** (`/sports`, `/events`, odds) + caching + quota logging | ❌ Cut — ran out of time |
+| **Notifications** (`GET /notifications`, `POST /:id/read`) | ❌ Stub only |
+| Profile test (JWT validation + notifications happy path) | ❌ Not written |
+
+## 6. Challenges & Delays
+
+- **`pinHash` / PIN `1234` (biggest time sink):** the seeded `pinHash` values in `data/users.json` did not validate against the documented default PIN `1234`, so login failed with "invalid credentials" no matter what. I had to regenerate a bcrypt hash for `1234` and update the seed before auth worked at all. Debugging this — confirming it was the hash and not the bcrypt/JWT wiring — cost a significant chunk of the budget and pushed the Odds API work out of scope.
+- **Integration wiring:** several cross-cutting bugs surfaced end-to-end:
+  - `go-svc` sent no CORS headers, so the browser blocked wallet/bets calls — added a CORS wrapper that also short-circuits preflight `OPTIONS` before auth runs.
+  - `go-svc` never loaded `JWT_SECRET` from `.env`, so it verified tokens with an empty secret and rejected every node-signed token as invalid/expired — fixed by loading the shared `.env` (godotenv).
+  - The login response omitted `userId`, so the UI requested `/wallet/undefined` — fixed by returning `{ token, userId }` from `/auth/login`.
+
+## 7. What I'd Do Next (another day)
+
+- Build the Odds API proxy + TTL cache + quota logging (the main missing rubric area).
+- Implement notifications from `data/notifications.json` + `POST /:id/read`.
+- Add the profile test (JWT reject/accept + notifications happy path).
+
+## 8. Running
+
+```bash
+docker compose up --build
+# UI        http://localhost:3000
+# go-svc    http://localhost:8081/health
+# node-svc  http://localhost:8082/health
+# login:    any seeded email in data/users.json, PIN 1234
+```
