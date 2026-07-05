@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -37,13 +38,15 @@ func main() {
 	})
 
 	http.HandleFunc("/wallet/", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		getBalanceHandler(service, w, r)
+		getWalletHandler(service, w, r)
 	}))
 
 	http.HandleFunc("/bets", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			getBetsHandler(service, w, r)
+		case http.MethodPost:
+			placeBetHandler(service, w, r)
 		default:
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -65,25 +68,56 @@ func withCORS(next http.Handler) http.Handler {
 	})
 }
 
+func placeBetHandler(service *wallet.Service, w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		UserID    string  `json:"userId"`
+		EventID   string  `json:"eventId"`
+		SportKey  string  `json:"sportKey"`
+		Market    string  `json:"market"`
+		Selection string  `json:"selection"`
+		Stake     float64 `json:"stake"`
+		Odds      float64 `json:"odds"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	bet, err := service.PlaceBet(req.UserID, req.EventID, req.Market, req.Selection, req.Stake, req.Odds)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"betId": bet.ID, "status": bet.Status})
+}
+
 func getBetsHandler(service *wallet.Service, w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
 
 	bets := service.GetBets(userID)
 
+	if l := r.URL.Query().Get("limit"); l != "" {
+		if n, err := strconv.Atoi(l); err == nil && n >= 0 && n < len(bets) {
+			bets = bets[:n]
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(bets)
 }
 
-func getBalanceHandler(service *wallet.Service, w http.ResponseWriter, r *http.Request) {
+func getWalletHandler(service *wallet.Service, w http.ResponseWriter, r *http.Request) {
 	// /wallet/{userId} — extract from path
 	userID := strings.TrimPrefix(r.URL.Path, "/wallet/")
 
-	balance, err := service.GetBalance(userID)
+	view, err := service.GetWallet(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]float64{"balance": balance})
+	json.NewEncoder(w).Encode(view)
 }

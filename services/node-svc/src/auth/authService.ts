@@ -17,7 +17,7 @@ export async function login(
     email: string,
     pin: string,
     userStore : UserStore
-): Promise<string> {
+): Promise<{ token: string; userId: string }> {
 
     const user = userStore.findByEmail(email);
     console.log('User found:', user);
@@ -33,8 +33,8 @@ export async function login(
     const token = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET as string,
-        { expiresIn: '1h' }
+        { expiresIn: '24h' }
     );
 
-    return token;
+    return { token, userId: user.id };
 }

@@ -24,7 +24,7 @@ func TestPlaceBet_ConcurrentNoDoubleSpend(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, err := service.PlaceBet("user-1", "event-1", betAmount)
+			_, err := service.PlaceBet("user-1", "event-1", "h2h", "Home", betAmount, 2.0)
 			if err == nil {
 				mu.Lock()
 				successCount++
