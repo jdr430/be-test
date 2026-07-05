@@ -25,7 +25,12 @@ func main() {
 		port = "8081"
 	}
 
-	store, err := wallet.NewStore("../../data/users.json")
+	seedPath := os.Getenv("SEED_DATA_PATH")
+	if seedPath == "" {
+		seedPath = "../../data/users.json"
+	}
+
+	store, err := wallet.NewStore(seedPath)
 	if err != nil {
 		log.Fatal("failed to load wallet seed data:", err)
 	}

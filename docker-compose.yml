@@ -17,13 +17,13 @@ services:
 
   go-svc:
     build:
-      context: .
-      dockerfile: services/go-svc/Dockerfile
+      context: ./services/go-svc
     ports: ["8081:8081"]
     environment:
       - PORT=8081
       - ODDS_API_KEY=${ODDS_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
+      - SEED_DATA_PATH=/app/data/users.json
     volumes:
       - ./data:/app/data:ro
 
@@ -33,7 +33,7 @@ services:
     ports: ["8082:8082"]
     environment:
       - PORT=8082
-      - ODDS_API_KEY=${ODDS_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
+      - SEED_DATA_PATH=/app/data/users.json
     volumes:
       - ./data:/app/data:ro

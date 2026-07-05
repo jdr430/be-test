@@ -22,7 +22,7 @@ if (!JWT_SECRET) {
 }
 const authMiddleware = createAuthMiddleware(JWT_SECRET);
 const userStore = new UserStore(
-    path.join(__dirname, '../../../data', 'users.json')
+    process.env.SEED_DATA_PATH ?? path.join(__dirname, '../../../data', 'users.json')
 );
 
 const app = express();
