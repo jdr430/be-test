@@ -45,8 +45,8 @@ app.post('/auth/login', async (req, res) => {
   }
 
   try {
-    const token = await login(email, pin, userStore);
-    res.json({ token });
+    const { token, userId } = await login(email, pin, userStore);
+    res.json({ token, userId });
   } catch (err) {
     console.log(err)
     res.status(401).json({ error: 'invalid credentials' });
