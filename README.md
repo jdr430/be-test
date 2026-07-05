@@ -286,6 +286,7 @@ Good luck.
   - `go-svc` sent no CORS headers, so the browser blocked wallet/bets calls — added a CORS wrapper that also short-circuits preflight `OPTIONS` before auth runs.
   - `go-svc` never loaded `JWT_SECRET` from `.env`, so it verified tokens with an empty secret and rejected every node-signed token as invalid/expired — fixed by loading the shared `.env` (godotenv).
   - The login response omitted `userId`, so the UI requested `/wallet/undefined` — fixed by returning `{ token, userId }` from `/auth/login`.
+- **Ramp-up on Node:** re-familiarising myself with Node/TypeScript slowed me down more than I'd have liked, and combined with the pinHash debugging above is part of why the Odds API work was cut.
 
 ## 7. What I'd Do Next (another day)
 
