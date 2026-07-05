@@ -5,7 +5,7 @@ import express from "express";
 import dotenv from 'dotenv';
 import { login } from './auth/authService';
 import path from "path";
-import { authMiddleware }  from './auth/authMiddleware.ts';
+import { createAuthMiddleware }  from './auth/authMiddleware';
 import  { UserStore }  from './store/userStore';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
@@ -15,14 +15,16 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
-console.log('JWT_SECRET loaded:', process.env.JWT_SECRET);
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
-// Now __dirname works exactly as before
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not set — check your .env file');
+}
+const authMiddleware = createAuthMiddleware(JWT_SECRET);
 const userStore = new UserStore(
     path.join(__dirname, '../../../data', 'users.json')
 );
 
-3
 const app = express();
 app.use(express.json());
 
@@ -52,7 +54,8 @@ app.post('/auth/login', async (req, res) => {
 });
 
 app.get('/me', authMiddleware, (req, res) => {
-  const user = userStore.findById(req.userId);
+  const user = userStore.findById(req.user.userId);
+  console.log(user)
   if (!user) return res.status(404).json({ error: 'user not found' });
 
   res.json({

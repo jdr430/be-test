@@ -18,9 +18,6 @@ export async function login(
     pin: string,
     userStore : UserStore
 ): Promise<string> {
-    console.log('--- LOGIN ATTEMPT ---');
-    console.log('Email received:', JSON.stringify(email));
-    console.log('Pin received:', JSON.stringify(pin));
 
     const user = userStore.findByEmail(email);
     console.log('User found:', user);
